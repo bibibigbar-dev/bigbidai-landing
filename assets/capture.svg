@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" role="img" aria-label="Mobile capture placeholder">
+  <rect width="900" height="1200" fill="#f6f1e6"/>
+  <rect x="210" y="70" width="480" height="1060" rx="60" fill="#fffdf8" stroke="#d9cfbd" stroke-width="8"/>
+  <circle cx="450" cy="145" r="16" fill="#d9cfbd"/>
+  <rect x="260" y="220" width="380" height="520" rx="30" fill="#e8f1ec"/>
+  <circle cx="450" cy="480" r="120" fill="#0c7656" opacity=".2"/>
+  <rect x="300" y="800" width="300" height="68" rx="20" fill="#0c7656"/>
+  <text x="450" y="845" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="32" font-weight="700" fill="#ffffff">Capture</text>
+  <text x="450" y="990" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-size="40" font-weight="700" fill="#0d201b">Mobile View</text>
+</svg>
