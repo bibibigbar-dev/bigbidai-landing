@@ -1,6 +1,9 @@
 const app = document.getElementById("app");
 
-app.innerHTML = `
+if (!app) {
+  console.warn("Landing app mount node not found.");
+} else {
+  app.innerHTML = `
 <header class="nav">
   <div class="wrap navin">
     <a class="brand" href="#top">bigbid <span>AI</span></a>
@@ -94,11 +97,11 @@ app.innerHTML = `
 
 <section class="section" id="faq"><div class="wrap faq"><div><div class="eyebrow">FAQ</div><h2>Questions before your first lot?</h2><p class="muted">bigbid AI is focused on making high-volume reseller and auction inventory easier to process.</p><a class="btn primary" href="#pricing">Try for Free</a></div><div class="faq-list">
   <div class="faq-item open"><button class="faq-q" aria-expanded="true" aria-controls="faq-a-1">What does bigbid AI do?<span>+</span></button><div class="faq-a" id="faq-a-1">It turns product photos into structured listing information such as title, description, estimated MSRP, recommended starting bid and lot data for export.</div></div>
-  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-2">Does it work on mobile and desktop?<span>+</span></button><div class="faq-a" id="faq-a-2">Yes. You can capture inventory from a phone and review, edit and export your lots from desktop.</div></div>
-  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-3">Can I use it with HiBid?<span>+</span></button><div class="faq-a" id="faq-a-3">bigbid AI is designed to generate export-ready data and pictures that can fit a HiBid auction workflow. Exact import requirements can vary and should be reviewed before publishing.</div></div>
-  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-4">How is MSRP determined?<span>+</span></button><div class="faq-a" id="faq-a-4">AI researches available product information and returns an estimated retail/MSRP value. Pricing is an estimate and should be reviewed before use.</div></div>
-  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-5">Can recommended bid rules be customized?<span>+</span></button><div class="faq-a" id="faq-a-5">Yes. Custom plans can support tailored bid rules and workflow requirements. More self-service pricing controls can also be added to the product.</div></div>
-  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-6">What happens after the first 10 items?<span>+</span></button><div class="faq-a" id="faq-a-6">Choose the Basic, Pro or Custom plan based on your monthly item volume and workflow needs.</div></div>
+  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-2">Does it work on mobile and desktop?<span>+</span></button><div class="faq-a" id="faq-a-2" hidden>Yes. You can capture inventory from a phone and review, edit and export your lots from desktop.</div></div>
+  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-3">Can I use it with HiBid?<span>+</span></button><div class="faq-a" id="faq-a-3" hidden>bigbid AI is designed to generate export-ready data and pictures that can fit a HiBid auction workflow. Exact import requirements can vary and should be reviewed before publishing.</div></div>
+  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-4">How is MSRP determined?<span>+</span></button><div class="faq-a" id="faq-a-4" hidden>AI researches available product information and returns an estimated retail/MSRP value. Pricing is an estimate and should be reviewed before use.</div></div>
+  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-5">Can recommended bid rules be customized?<span>+</span></button><div class="faq-a" id="faq-a-5" hidden>Yes. Custom plans can support tailored bid rules and workflow requirements. More self-service pricing controls can also be added to the product.</div></div>
+  <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="faq-a-6">What happens after the first 10 items?<span>+</span></button><div class="faq-a" id="faq-a-6" hidden>Choose the Basic, Pro or Custom plan based on your monthly item volume and workflow needs.</div></div>
 </div></div></section>
 
 <section class="final"><div class="wrap"><div class="finalbox"><div><div class="eyebrow" style="color:#bfe5d7">Start your first lot today</div><h2>Spend less time building lots. Spend more time selling.</h2><p>From single products to full liquidation pallets, bigbid AI helps resellers, auction houses, wholesale teams and warehouses turn photos into auction-ready inventory.</p></div><div><a class="btn" href="#pricing">Try 10 Items Free →</a><div style="font-size:12px;color:#d8eee6;margin-top:10px;text-align:center">No credit card required</div></div></div></div></section>
@@ -107,10 +110,16 @@ app.innerHTML = `
 <footer><div class="wrap foot"><div><div class="brand">bigbid <span>AI</span></div><div class="muted" style="font-size:12px;margin-top:5px">bigbidai.com · AI-powered inventory and auction listing automation.</div></div><div class="footlinks"><a href="#product">Product</a><a href="#usecases">Use Cases</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="mailto:support@bigbidai.com">Contact</a><a href="#">Privacy</a><a href="#">Terms</a></div></div></footer>
 `;
 
-document.querySelectorAll(".faq-q").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const item = btn.parentElement;
-    item.classList.toggle("open");
-    btn.setAttribute("aria-expanded", item.classList.contains("open") ? "true" : "false");
+  document.querySelectorAll(".faq-q").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const item = btn.parentElement;
+      const answer = document.getElementById(btn.getAttribute("aria-controls"));
+      item.classList.toggle("open");
+      const isOpen = item.classList.contains("open");
+      btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      if (answer) {
+        answer.hidden = !isOpen;
+      }
+    });
   });
-});
+}
