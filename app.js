@@ -110,7 +110,9 @@ if (!app) {
 <footer><div class="wrap foot"><div><div class="brand">bigbid <span>AI</span></div><div class="muted" style="font-size:12px;margin-top:5px">bigbidai.com · AI-powered inventory and auction listing automation.</div></div><div class="footlinks"><a href="#product">Product</a><a href="#usecases">Use Cases</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="mailto:support@bigbidai.com">Contact</a><a href="#">Privacy</a><a href="#">Terms</a></div></div></footer>
 `;
 
-  document.querySelectorAll(".faq-q").forEach((btn) => {
+  const faqButtons = Array.from(document.querySelectorAll(".faq-q"));
+
+  faqButtons.forEach((btn, index) => {
     btn.addEventListener("click", () => {
       const item = btn.parentElement;
       const answer = document.getElementById(btn.getAttribute("aria-controls"));
@@ -119,6 +121,18 @@ if (!app) {
       btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
       if (answer) {
         answer.hidden = !isOpen;
+      }
+    });
+
+    btn.addEventListener("keydown", (event) => {
+      let nextIndex = index;
+      if (event.key === "ArrowDown") nextIndex = (index + 1) % faqButtons.length;
+      if (event.key === "ArrowUp") nextIndex = (index - 1 + faqButtons.length) % faqButtons.length;
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = faqButtons.length - 1;
+      if (nextIndex !== index) {
+        event.preventDefault();
+        faqButtons[nextIndex].focus();
       }
     });
   });
