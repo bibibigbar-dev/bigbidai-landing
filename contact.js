@@ -29,7 +29,7 @@ form?.addEventListener("submit", async (event) => {
   setStatus("Sending your message…");
 
   try {
-    const response = await fetch(`https://formsubmit.co/ajax/${SUPPORT_EMAIL}`, {
+    const response = await fetch("/api/contact", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -40,17 +40,17 @@ form?.addEventListener("submit", async (event) => {
         email,
         subject,
         message,
-        _subject: `[bigbid AI Contact] ${subject}`,
-        _replyto: email,
-        _template: "table",
+        _honey: form._honey?.value || "",
       }),
     });
 
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.message || "Unable to send message.");
+    if (!response.ok || data.ok === false) {
+      throw new Error(data.message || "Unable to send message.");
+    }
 
     form.reset();
-    setStatus("Thanks! Your message was sent to support@bigbidai.com.", "ok");
+    setStatus("Thanks! Your message was sent. We typically reply within 1–2 business days.", "ok");
   } catch (error) {
     setStatus(
       `Could not send right now. Please email ${SUPPORT_EMAIL} directly.`,
