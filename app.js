@@ -26,7 +26,7 @@ if (!app) {
       <div class="audience"><span class="chip">Resellers</span><span class="chip">Auction Houses</span><span class="chip">Wholesale</span><span class="chip">Warehouses</span><span class="chip">Liquidation</span><span class="chip">Pallet Sellers</span></div>
     </div>
     <div class="hero-visual" aria-label="bigbid AI product capture and analysis mockup">
-      <div class="phone"><img src="assets/product-electronics.svg" alt="Unbranded wireless earbuds product photo analyzed by bigbid AI"></div>
+      <div class="phone"><img src="assets/mainproduct.jpg" alt="Wireless earbuds product photo analyzed by bigbid AI"></div>
       <div class="ai-card">
         <div class="ai-top"><strong>AI Product Analysis</strong><span class="status">● Complete</span></div>
         <div class="field"><small>Title</small><strong>Wireless Earbuds with Charging Case</strong></div>
