@@ -50,7 +50,7 @@ form?.addEventListener("submit", async (event) => {
     }
 
     form.reset();
-    setStatus("Thanks! Your message was sent. We typically reply within 1–2 business days.", "ok");
+    setStatus("Thanks! Your message was sent.", "ok");
   } catch (error) {
     const detail = error instanceof Error ? error.message : "";
     const isConfigError = /not configured/i.test(detail);
