@@ -87,10 +87,11 @@ if (!app) {
     <div class="price">
       <h3>Free</h3>
       <div class="amount">$0</div>
-      <p>Test bigbid AI with real inventory.</p>
+      <p>Try bigbid AI with real inventory.</p>
       <a class="btn" href="https://my.bigbidai.com/">Try bigbidAI</a>
       <div class="price-note">No commitment · Cancel anytime</div>
       <ul>
+        <li>Up to 10 items</li>
         <li>AI product recognition</li>
         <li>Title & description generation</li>
         <li>MSRP estimate</li>
@@ -101,11 +102,11 @@ if (!app) {
     <div class="price">
       <h3>Basic</h3>
       <div class="amount">$29.99</div>
-      <p>For resellers and auction sellers.</p>
+      <p class="price-includes">Everything in Free, plus:</p>
       <a class="btn" href="https://my.bigbidai.com/">Try bigbidAI</a>
       <div class="price-note">No commitment · Cancel anytime</div>
-      <p class="price-includes">Everything in Free and:</p>
       <ul>
+        <li>Up to 300 items</li>
         <li>Mobile + desktop</li>
         <li>Standard Excel / CSV export</li>
         <li>Reference product photos</li>
@@ -115,11 +116,11 @@ if (!app) {
       <span class="ribbon">Most Popular</span>
       <h3>Pro</h3>
       <div class="amount">$99.99</div>
-      <p>For auction and liquidation operations.</p>
+      <p class="price-includes">Everything in Basic, plus:</p>
       <a class="btn primary" href="https://my.bigbidai.com/">Try bigbidAI</a>
       <div class="price-note">No commitment · Cancel anytime</div>
-      <p class="price-includes">Everything in Basic and:</p>
       <ul>
+        <li>Up to 1,000 items</li>
         <li>Continuous capture mode</li>
         <li>Background AI processing</li>
         <li>Batch lot workflow</li>
@@ -131,12 +132,12 @@ if (!app) {
     <div class="price">
       <h3>Enterprise</h3>
       <div class="amount">$499.99</div>
-      <p>For high-volume teams and custom workflows.</p>
+      <p class="price-includes">Everything in Pro, plus:</p>
       <a class="btn" href="https://my.bigbidai.com/">Try bigbidAI</a>
       <div class="price-note">No commitment · Cancel anytime</div>
-      <p class="price-includes">Everything in Pro, plus:</p>
       <ul>
-        <li>Team / warehouse setup</li>
+        <li>Up to 5,000 items</li>
+        <li>High-volume batch processing</li>
         <li>Custom bid rules</li>
         <li>Custom import/export formats</li>
         <li>Workflow integrations</li>
