@@ -88,8 +88,6 @@ if (!app) {
       <h3>Free</h3>
       <div class="amount">$0</div>
       <p>Try bigbid AI with real inventory.</p>
-      <a class="btn" href="https://my.bigbidai.com/">Try bigbidAI</a>
-      <div class="price-note">No commitment · Cancel anytime</div>
       <ul>
         <li>Up to 10 items</li>
         <li>AI product recognition</li>
@@ -98,27 +96,25 @@ if (!app) {
         <li>Recommended bid</li>
         <li>Basic export</li>
       </ul>
+      <a class="btn" href="https://my.bigbidai.com/">Try bigbidAI</a>
     </div>
     <div class="price">
       <h3>Basic</h3>
       <div class="amount">$29.99</div>
       <p class="price-includes">Everything in Free, plus:</p>
-      <a class="btn" href="https://my.bigbidai.com/">Try bigbidAI</a>
-      <div class="price-note">No commitment · Cancel anytime</div>
       <ul>
         <li>Up to 300 items</li>
         <li>Mobile + desktop</li>
         <li>Standard Excel / CSV export</li>
         <li>Reference product photos</li>
       </ul>
+      <a class="btn" href="https://my.bigbidai.com/">Try bigbidAI</a>
     </div>
     <div class="price pop">
       <span class="ribbon">Most Popular</span>
       <h3>Pro</h3>
       <div class="amount">$99.99</div>
       <p class="price-includes">Everything in Basic, plus:</p>
-      <a class="btn primary" href="https://my.bigbidai.com/">Try bigbidAI</a>
-      <div class="price-note">No commitment · Cancel anytime</div>
       <ul>
         <li>Up to 1,000 items</li>
         <li>Continuous capture mode</li>
@@ -128,13 +124,12 @@ if (!app) {
         <li>Full export tools</li>
         <li>Priority processing</li>
       </ul>
+      <a class="btn primary" href="https://my.bigbidai.com/">Try bigbidAI</a>
     </div>
     <div class="price">
       <h3>Enterprise</h3>
       <div class="amount">$499.99</div>
       <p class="price-includes">Everything in Pro, plus:</p>
-      <a class="btn" href="https://my.bigbidai.com/">Try bigbidAI</a>
-      <div class="price-note">No commitment · Cancel anytime</div>
       <ul>
         <li>Up to 5,000 items</li>
         <li>High-volume batch processing</li>
@@ -143,6 +138,7 @@ if (!app) {
         <li>Workflow integrations</li>
         <li>Dedicated support</li>
       </ul>
+      <a class="btn" href="https://my.bigbidai.com/">Try bigbidAI</a>
     </div>
   </div>
 </div></section>
