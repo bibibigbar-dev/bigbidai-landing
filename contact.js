@@ -52,8 +52,12 @@ form?.addEventListener("submit", async (event) => {
     form.reset();
     setStatus("Thanks! Your message was sent. We typically reply within 1–2 business days.", "ok");
   } catch (error) {
+    const detail = error instanceof Error ? error.message : "";
+    const isConfigError = /not configured/i.test(detail);
     setStatus(
-      `Could not send right now. Please email ${SUPPORT_EMAIL} directly.`,
+      isConfigError
+        ? `Contact form is not configured yet. Please email ${SUPPORT_EMAIL} directly.`
+        : `Could not send right now. Please email ${SUPPORT_EMAIL} directly.`,
       "err"
     );
     console.error(error);
