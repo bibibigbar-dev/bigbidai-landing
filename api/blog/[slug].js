@@ -1,5 +1,5 @@
 const { getPublishedPostBySlug } = require("../_lib/supabase");
-const { escapeHtml, markdownToHtml } = require("../_lib/markdown");
+const { escapeHtml, contentToHtml } = require("../_lib/markdown");
 const { formatDate, renderPage, SITE_URL } = require("../_lib/layout");
 
 function getSlug(req) {
@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
 
     const date = formatDate(post.published_at || post.created_at);
     const description = post.excerpt || post.title;
-    const contentHtml = markdownToHtml(post.content);
+    const contentHtml = contentToHtml(post.content);
     const cover = post.cover_image_url
       ? `<img class="blog-cover" src="${escapeHtml(post.cover_image_url)}" alt="" width="1200" height="630">`
       : "";

@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import Quill from "https://cdn.jsdelivr.net/npm/quill@2.0.3/+esm";
 
 const statusEl = document.getElementById("admin-status");
 const loginPanel = document.getElementById("login-panel");
@@ -15,9 +16,14 @@ const slugInput = document.getElementById("slug");
 const adminHeading = document.getElementById("admin-heading");
 const adminLead = document.getElementById("admin-lead");
 
+const Size = Quill.import("attributors/style/size");
+Size.whitelist = ["12px", "14px", "16px", "18px", "20px", "24px", "32px"];
+Quill.register(Size, true);
+
 let supabase = null;
 let currentUser = null;
 let slugTouched = false;
+let quill = null;
 
 function setStatus(message, type = "") {
   statusEl.textContent = message || "";
@@ -46,11 +52,114 @@ function slugify(value) {
     .slice(0, 180);
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function getEditorHtml() {
+  if (!quill) return "";
+  const html = quill.root.innerHTML.trim();
+  if (!html || html === "<p><br></p>" || html === "<p></p>") return "";
+  return html;
+}
+
+function setEditorHtml(html) {
+  if (!quill) return;
+  const value = String(html || "").trim();
+  quill.setContents([]);
+  if (!value) {
+    quill.setText("");
+    return;
+  }
+  quill.clipboard.dangerouslyPasteHTML(value);
+}
+
+function isEditorEmpty() {
+  if (!quill) return true;
+  return !quill.getText().replace(/\n/g, "").trim();
+}
+
+async function uploadEditorImage(file) {
+  if (!currentUser) throw new Error("Sign in required to upload images.");
+  if (!file || !file.type.startsWith("image/")) throw new Error("Please choose an image file.");
+  if (file.size > 5 * 1024 * 1024) throw new Error("Image must be 5MB or smaller.");
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-").toLowerCase();
+  const path = `${currentUser.id}/${Date.now()}-${safeName}`;
+  const { error } = await supabase.storage.from("blog-images").upload(path, file, {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (error) throw error;
+
+  const { data } = supabase.storage.from("blog-images").getPublicUrl(path);
+  if (!data || !data.publicUrl) throw new Error("Could not get image URL.");
+  return data.publicUrl;
+}
+
+function initQuill() {
+  if (quill) return quill;
+
+  quill = new Quill("#editor", {
+    theme: "snow",
+    placeholder: "Write your article…",
+    modules: {
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, false] }],
+          [{ size: Size.whitelist }],
+          ["bold", "italic", "underline"],
+          [{ list: "ordered" }, { list: "bullet" }],
+          ["link", "image"],
+          ["clean"],
+        ],
+        handlers: {
+          image() {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            input.click();
+            input.onchange = async () => {
+              const file = input.files && input.files[0];
+              if (!file) return;
+              try {
+                setStatus("Uploading image…");
+                const url = await uploadEditorImage(file);
+                const range = quill.getSelection(true);
+                quill.insertEmbed(range.index, "image", url, "user");
+                quill.setSelection(range.index + 1);
+                setStatus("Image inserted.", "ok");
+              } catch (error) {
+                const fallback = window.prompt("Upload failed. Paste an image URL instead:");
+                if (fallback) {
+                  const range = quill.getSelection(true);
+                  quill.insertEmbed(range.index, "image", fallback.trim(), "user");
+                  quill.setSelection(range.index + 1);
+                  setStatus("Image URL inserted.", "ok");
+                } else {
+                  setStatus(error.message || "Image upload failed.", "err");
+                }
+              }
+            };
+          },
+        },
+      },
+    },
+  });
+
+  return quill;
+}
+
 function resetForm() {
   postForm.reset();
   document.getElementById("post-id").value = "";
   document.getElementById("status").value = "draft";
   slugTouched = false;
+  setEditorHtml("");
   viewPostLink.href = "/blog";
   viewPostLink.textContent = "View blog";
 }
@@ -61,7 +170,7 @@ function fillForm(post) {
   slugInput.value = post.slug || "";
   document.getElementById("excerpt").value = post.excerpt || "";
   document.getElementById("cover_image_url").value = post.cover_image_url || "";
-  document.getElementById("content").value = post.content || "";
+  setEditorHtml(post.content || "");
   document.getElementById("status").value = post.status || "draft";
   slugTouched = Boolean(post.slug);
   if (post.slug && post.status === "published") {
@@ -121,14 +230,6 @@ async function loadPosts() {
   }
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
 async function openPost(id) {
   setStatus("Loading post…");
   const { data, error } = await supabase.from("blog_posts").select("*").eq("id", id).single();
@@ -146,6 +247,7 @@ async function showEditor(user) {
   loginPanel.hidden = true;
   editorPanel.hidden = false;
   setHero("editor");
+  initQuill();
   resetForm();
   await loadPosts();
   setStatus(`Signed in as ${user.email}`);
@@ -204,18 +306,19 @@ postForm.addEventListener("submit", async (event) => {
 
   const id = document.getElementById("post-id").value;
   const status = document.getElementById("status").value;
+  const content = getEditorHtml();
   const payload = {
     title: titleInput.value.trim(),
     slug: slugify(slugInput.value),
     excerpt: document.getElementById("excerpt").value.trim(),
     cover_image_url: document.getElementById("cover_image_url").value.trim() || null,
-    content: document.getElementById("content").value,
+    content,
     status,
     author_id: currentUser.id,
     published_at: status === "published" ? new Date().toISOString() : null,
   };
 
-  if (!payload.title || !payload.slug || !payload.content.trim()) {
+  if (!payload.title || !payload.slug || isEditorEmpty()) {
     setStatus("Title, slug, and content are required.", "err");
     return;
   }
