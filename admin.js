@@ -12,6 +12,8 @@ const signOutBtn = document.getElementById("sign-out-btn");
 const viewPostLink = document.getElementById("view-post-link");
 const titleInput = document.getElementById("title");
 const slugInput = document.getElementById("slug");
+const adminHeading = document.getElementById("admin-heading");
+const adminLead = document.getElementById("admin-lead");
 
 let supabase = null;
 let currentUser = null;
@@ -20,6 +22,17 @@ let slugTouched = false;
 function setStatus(message, type = "") {
   statusEl.textContent = message || "";
   statusEl.className = `form-status${type ? ` ${type}` : ""}`;
+}
+
+function setHero(mode) {
+  if (!adminHeading || !adminLead) return;
+  if (mode === "editor") {
+    adminHeading.textContent = "Blog editor";
+    adminLead.textContent = "Write and publish SEO pages on bigbidai.com using the shared bigbid Supabase database.";
+    return;
+  }
+  adminHeading.textContent = "Admin sign in";
+  adminLead.textContent = "Sign in with your bigbid AI admin account to write and publish blog posts.";
 }
 
 function slugify(value) {
