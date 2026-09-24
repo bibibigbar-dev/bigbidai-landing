@@ -145,6 +145,7 @@ async function showEditor(user) {
   await requireAdmin(user);
   loginPanel.hidden = true;
   editorPanel.hidden = false;
+  setHero("editor");
   resetForm();
   await loadPosts();
   setStatus(`Signed in as ${user.email}`);
@@ -154,6 +155,7 @@ function showLogin(message = "") {
   currentUser = null;
   loginPanel.hidden = false;
   editorPanel.hidden = true;
+  setHero("login");
   setStatus(message, message ? "err" : "");
 }
 
