@@ -16,7 +16,9 @@ function formatDate(value) {
 function navHtml(active = "") {
   const items = [
     { href: "/#product", label: "Product" },
+    { href: "/#usecases", label: "Use Cases" },
     { href: "/#pricing", label: "Pricing" },
+    { href: "/#testimonials", label: "Testimonials" },
     { href: "/#faq", label: "FAQ" },
     { href: "/contact", label: "Contact" },
     { href: "/blog", label: "Blog", key: "blog" },
@@ -29,6 +31,24 @@ function navHtml(active = "") {
       return `<a href="${item.href}"${attrs}>${item.label}</a>`;
     })
     .join("\n        ");
+}
+
+function headerHtml(active = "") {
+  return `<header class="nav">
+  <div class="wrap navin">
+    <a class="brand" href="/"><img src="/assets/logo.png?v=2" width="180" height="60" alt="BigbidAI"></a>
+    <div class="nav-actions">
+      <a class="btn primary small nav-cta" href="https://my.bigbidai.com/">Try for Free</a>
+      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="primary-menu">
+        <span class="menu-toggle-bars" aria-hidden="true"></span>
+      </button>
+    </div>
+    <nav class="links" id="primary-menu" aria-label="Primary">
+      ${navHtml(active)}
+      <a class="btn primary small links-cta" href="https://my.bigbidai.com/">Try for Free</a>
+    </nav>
+  </div>
+</header>`;
 }
 
 function footerHtml() {
@@ -100,19 +120,12 @@ function renderPage({
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
-  <header class="nav">
-    <div class="wrap navin">
-      <a class="brand" href="/"><img src="/assets/logo.png?v=2" width="180" height="60" alt="BigbidAI"></a>
-      <nav class="links" aria-label="Primary">
-        ${navHtml(activeNav)}
-        <a class="btn primary small" href="https://my.bigbidai.com/">Try for Free</a>
-      </nav>
-    </div>
-  </header>
+  ${headerHtml(activeNav)}
   <main>
     ${bodyHtml}
   </main>
   ${footerHtml()}
+  <script type="module" src="/nav-menu.js"></script>
 </body>
 </html>`;
 }
