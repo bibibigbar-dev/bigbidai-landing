@@ -6,6 +6,20 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+function looksLikeHtml(value) {
+  return /<\/?[a-z][\s\S]*>/i.test(String(value || ""));
+}
+
+function sanitizeBlogHtml(html) {
+  let output = String(html || "");
+  output = output.replace(/<\s*(script|style|iframe|object|embed|link|meta)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, "");
+  output = output.replace(/<\s*(script|style|iframe|object|embed|link|meta)[^>]*\/?\s*>/gi, "");
+  output = output.replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+  output = output.replace(/(href|src)\s*=\s*("|\')\s*javascript:[^"']*\2/gi, '$1="#"');
+  output = output.replace(/<(?!\/?(?:p|br|hr|h[1-3]|ul|ol|li|strong|b|em|i|u|a|img|span|div|blockquote|code|pre)\b)[^>]+>/gi, "");
+  return output;
+}
+
 function inlineMarkdown(text) {
   let html = escapeHtml(text);
   html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
@@ -93,7 +107,16 @@ function markdownToHtml(markdown) {
   return parts.join("\n");
 }
 
+function contentToHtml(content) {
+  const source = String(content || "").trim();
+  if (!source || source === "<p><br></p>" || source === "<p></p>") return "";
+  if (looksLikeHtml(source)) return sanitizeBlogHtml(source);
+  return markdownToHtml(source);
+}
+
 module.exports = {
   escapeHtml,
   markdownToHtml,
+  contentToHtml,
+  sanitizeBlogHtml,
 };
