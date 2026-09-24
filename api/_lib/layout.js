@@ -17,9 +17,9 @@ function navHtml(active = "") {
   const items = [
     { href: "/#product", label: "Product" },
     { href: "/#pricing", label: "Pricing" },
-    { href: "/blog", label: "Blog", key: "blog" },
     { href: "/#faq", label: "FAQ" },
     { href: "/contact", label: "Contact" },
+    { href: "/blog", label: "Blog", key: "blog" },
   ];
 
   return items
@@ -40,10 +40,10 @@ function footerHtml() {
     </div>
     <div class="footlinks">
       <a href="/#product">Product</a>
-      <a href="/blog">Blog</a>
       <a href="/#pricing">Pricing</a>
       <a href="/#faq">FAQ</a>
       <a href="/contact">Contact</a>
+      <a href="/blog">Blog</a>
       <a href="/privacy">Privacy</a>
       <a href="/terms">Terms</a>
     </div>
