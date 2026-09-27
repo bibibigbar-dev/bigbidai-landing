@@ -68,24 +68,27 @@ async function supabaseFetch(path, { method = "GET", token, body, prefer } = {})
   return data;
 }
 
+function livePostFilter() {
+  const now = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  return `or=(status.eq.published,and(status.eq.scheduled,published_at.lte."${now}"))`;
+}
+
 async function listPublishedPosts({ limit = 50 } = {}) {
   const params = new URLSearchParams({
     select: "id,slug,title,excerpt,cover_image_url,published_at,updated_at,created_at",
-    status: "eq.published",
     order: "published_at.desc.nullslast",
     limit: String(limit),
   });
-  return supabaseFetch(`blog_posts?${params.toString()}`);
+  return supabaseFetch(`blog_posts?${params.toString()}&${livePostFilter()}`);
 }
 
 async function getPublishedPostBySlug(slug) {
   const params = new URLSearchParams({
     select: "id,slug,title,excerpt,content,cover_image_url,published_at,updated_at,created_at",
     slug: `eq.${slug}`,
-    status: "eq.published",
     limit: "1",
   });
-  const rows = await supabaseFetch(`blog_posts?${params.toString()}`);
+  const rows = await supabaseFetch(`blog_posts?${params.toString()}&${livePostFilter()}`);
   return Array.isArray(rows) && rows.length ? rows[0] : null;
 }
 

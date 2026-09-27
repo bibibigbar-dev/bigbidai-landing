@@ -154,10 +154,45 @@ function initQuill() {
   return quill;
 }
 
+function toDatetimeLocalValue(iso) {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function formatWhen(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function isLivePost(post) {
+  if (!post) return false;
+  if (post.status === "published") return true;
+  if (post.status !== "scheduled" || !post.published_at) return false;
+  return new Date(post.published_at).getTime() <= Date.now();
+}
+
+function syncScheduleField() {
+  const status = document.getElementById("status").value;
+  const field = document.getElementById("schedule-field");
+  field.hidden = status !== "scheduled";
+}
+
 function resetForm() {
   postForm.reset();
   document.getElementById("post-id").value = "";
   document.getElementById("status").value = "draft";
+  document.getElementById("scheduled_at").value = "";
+  syncScheduleField();
   slugTouched = false;
   setEditorHtml("");
   viewPostLink.href = "/blog";
@@ -172,8 +207,11 @@ function fillForm(post) {
   document.getElementById("cover_image_url").value = post.cover_image_url || "";
   setEditorHtml(post.content || "");
   document.getElementById("status").value = post.status || "draft";
+  document.getElementById("scheduled_at").value =
+    post.status === "scheduled" ? toDatetimeLocalValue(post.published_at) : "";
+  syncScheduleField();
   slugTouched = Boolean(post.slug);
-  if (post.slug && post.status === "published") {
+  if (post.slug && isLivePost(post)) {
     viewPostLink.href = `/blog/${post.slug}`;
     viewPostLink.textContent = "View post";
   } else {
@@ -222,7 +260,10 @@ async function loadPosts() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "admin-post-item";
-    button.innerHTML = `<strong>${escapeHtml(post.title)}</strong><span>${escapeHtml(post.status)} · ${escapeHtml(
+    const when = post.status === "scheduled" && post.published_at ? formatWhen(post.published_at) : "";
+    const live = post.status === "scheduled" && isLivePost(post) ? " (live)" : "";
+    const statusLabel = when ? `scheduled${live} · ${when}` : post.status;
+    button.innerHTML = `<strong>${escapeHtml(post.title)}</strong><span>${escapeHtml(statusLabel)} · ${escapeHtml(
       post.slug
     )}</span>`;
     button.addEventListener("click", () => openPost(post.id));
@@ -300,6 +341,8 @@ slugInput.addEventListener("input", () => {
   slugInput.value = slugify(slugInput.value);
 });
 
+document.getElementById("status").addEventListener("change", syncScheduleField);
+
 postForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!currentUser) return;
@@ -307,6 +350,13 @@ postForm.addEventListener("submit", async (event) => {
   const id = document.getElementById("post-id").value;
   const status = document.getElementById("status").value;
   const content = getEditorHtml();
+  const scheduledValue = document.getElementById("scheduled_at").value;
+  const scheduledAt = scheduledValue ? new Date(scheduledValue) : null;
+  if (status === "scheduled" && (!scheduledAt || Number.isNaN(scheduledAt.getTime()))) {
+    setStatus("Choose a date and time to schedule this post.", "err");
+    return;
+  }
+
   const payload = {
     title: titleInput.value.trim(),
     slug: slugify(slugInput.value),
@@ -315,7 +365,12 @@ postForm.addEventListener("submit", async (event) => {
     content,
     status,
     author_id: currentUser.id,
-    published_at: status === "published" ? new Date().toISOString() : null,
+    published_at:
+      status === "scheduled"
+        ? scheduledAt.toISOString()
+        : status === "published"
+          ? new Date().toISOString()
+          : null,
   };
 
   if (!payload.title || !payload.slug || isEditorEmpty()) {
@@ -330,10 +385,14 @@ postForm.addEventListener("submit", async (event) => {
     if (status === "published") {
       const { data: existing } = await supabase
         .from("blog_posts")
-        .select("published_at")
+        .select("status,published_at")
         .eq("id", id)
         .maybeSingle();
-      if (existing && existing.published_at) payload.published_at = existing.published_at;
+      const alreadyLive =
+        existing &&
+        existing.published_at &&
+        (existing.status === "published" || new Date(existing.published_at).getTime() <= Date.now());
+      if (alreadyLive) payload.published_at = existing.published_at;
     }
     result = await supabase.from("blog_posts").update(payload).eq("id", id).select("*").single();
   } else {
@@ -347,7 +406,13 @@ postForm.addEventListener("submit", async (event) => {
 
   fillForm(result.data);
   await loadPosts();
-  setStatus(status === "published" ? "Published. Live at /blog/" + result.data.slug : "Draft saved.", "ok");
+  if (status === "published") {
+    setStatus("Published. Live at /blog/" + result.data.slug, "ok");
+  } else if (status === "scheduled") {
+    setStatus("Scheduled for " + formatWhen(result.data.published_at) + ".", "ok");
+  } else {
+    setStatus("Draft saved.", "ok");
+  }
 });
 
 deletePostBtn.addEventListener("click", async () => {

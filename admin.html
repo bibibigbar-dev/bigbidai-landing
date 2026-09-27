@@ -104,8 +104,14 @@
                 <label for="status">Status</label>
                 <select id="status" name="status">
                   <option value="draft">Draft</option>
+                  <option value="scheduled">Scheduled</option>
                   <option value="published">Published</option>
                 </select>
+              </div>
+              <div class="form-field" id="schedule-field" hidden>
+                <label for="scheduled_at">Publish at</label>
+                <input id="scheduled_at" name="scheduled_at" type="datetime-local">
+                <p class="muted" style="font-size:13px;margin:8px 0 0">The post stays off the blog until this time, then appears on its own.</p>
               </div>
               <div class="admin-actions">
                 <button class="btn primary" type="submit">Save</button>
