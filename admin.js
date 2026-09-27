@@ -30,6 +30,23 @@ function setStatus(message, type = "") {
   statusEl.className = `form-status${type ? ` ${type}` : ""}`;
 }
 
+function showToast(message, type = "ok") {
+  let toast = document.getElementById("admin-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "admin-toast";
+    toast.setAttribute("role", "status");
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.className = `admin-toast${type ? ` ${type}` : ""}`;
+  toast.hidden = false;
+  window.clearTimeout(showToast.timer);
+  showToast.timer = window.setTimeout(() => {
+    toast.hidden = true;
+  }, 3200);
+}
+
 function setHero(mode) {
   if (!adminHeading || !adminLead) return;
   if (mode === "editor") {
@@ -154,18 +171,35 @@ function initQuill() {
   return quill;
 }
 
-function toDatetimeLocalValue(iso) {
-  if (!iso) return "";
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
+function fillScheduleFields(iso) {
+  const date = iso ? new Date(iso) : null;
+  const valid = date && !Number.isNaN(date.getTime());
   const pad = (value) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  document.getElementById("schedule-month").value = valid ? String(date.getMonth()) : "";
+  document.getElementById("schedule-day").value = valid ? String(date.getDate()) : "";
+  document.getElementById("schedule-year").value = valid ? String(date.getFullYear()) : "";
+  document.getElementById("schedule-time").value = valid
+    ? `${pad(date.getHours())}:${pad(date.getMinutes())}`
+    : "";
+}
+
+function readScheduledAt() {
+  const month = document.getElementById("schedule-month").value;
+  const day = Number(document.getElementById("schedule-day").value);
+  const year = Number(document.getElementById("schedule-year").value);
+  const time = document.getElementById("schedule-time").value;
+  if (month === "" || !day || !year || !time) return null;
+  const [hours, minutes] = time.split(":").map(Number);
+  const date = new Date(year, Number(month), day, hours, minutes);
+  if (Number.isNaN(date.getTime())) return null;
+  if (date.getMonth() !== Number(month) || date.getDate() !== day) return null;
+  return date;
 }
 
 function formatWhen(iso) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -191,7 +225,7 @@ function resetForm() {
   postForm.reset();
   document.getElementById("post-id").value = "";
   document.getElementById("status").value = "draft";
-  document.getElementById("scheduled_at").value = "";
+  fillScheduleFields("");
   syncScheduleField();
   slugTouched = false;
   setEditorHtml("");
@@ -207,8 +241,7 @@ function fillForm(post) {
   document.getElementById("cover_image_url").value = post.cover_image_url || "";
   setEditorHtml(post.content || "");
   document.getElementById("status").value = post.status || "draft";
-  document.getElementById("scheduled_at").value =
-    post.status === "scheduled" ? toDatetimeLocalValue(post.published_at) : "";
+  fillScheduleFields(post.status === "scheduled" ? post.published_at : "");
   syncScheduleField();
   slugTouched = Boolean(post.slug);
   if (post.slug && isLivePost(post)) {
@@ -350,8 +383,7 @@ postForm.addEventListener("submit", async (event) => {
   const id = document.getElementById("post-id").value;
   const status = document.getElementById("status").value;
   const content = getEditorHtml();
-  const scheduledValue = document.getElementById("scheduled_at").value;
-  const scheduledAt = scheduledValue ? new Date(scheduledValue) : null;
+  const scheduledAt = readScheduledAt();
   if (status === "scheduled" && (!scheduledAt || Number.isNaN(scheduledAt.getTime()))) {
     setStatus("Choose a date and time to schedule this post.", "err");
     return;
@@ -401,6 +433,7 @@ postForm.addEventListener("submit", async (event) => {
 
   if (result.error) {
     setStatus(result.error.message, "err");
+    showToast(result.error.message, "err");
     return;
   }
 
@@ -413,6 +446,7 @@ postForm.addEventListener("submit", async (event) => {
   } else {
     setStatus("Draft saved.", "ok");
   }
+  showToast("Saved.");
 });
 
 deletePostBtn.addEventListener("click", async () => {

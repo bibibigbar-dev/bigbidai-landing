@@ -17,6 +17,17 @@ function sanitizeBlogHtml(html) {
   output = output.replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
   output = output.replace(/(href|src)\s*=\s*("|\')\s*javascript:[^"']*\2/gi, '$1="#"');
   output = output.replace(/<(?!\/?(?:p|br|hr|h[1-3]|ul|ol|li|strong|b|em|i|u|a|img|span|div|blockquote|code|pre)\b)[^>]+>/gi, "");
+  output = output.replace(/\sclass\s*=\s*("|\')([^"\']*)\1/gi, (match, _quote, className) => {
+    const kept = String(className)
+      .split(/\s+/)
+      .filter((name) => name && !name.startsWith("ql-"));
+    return kept.length ? ` class="${kept.join(" ")}"` : "";
+  });
+  let previous = "";
+  while (previous !== output) {
+    previous = output;
+    output = output.replace(/<span>([\s\S]*?)<\/span>/gi, "$1");
+  }
   return output;
 }
 

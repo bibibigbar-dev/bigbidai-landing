@@ -97,7 +97,9 @@
               </div>
               <div class="form-field">
                 <label for="editor">Content</label>
-                <div id="editor" class="admin-editor"></div>
+                <div class="admin-editor">
+                  <div id="editor"></div>
+                </div>
                 <p class="muted" style="font-size:13px;margin:8px 0 0">Use the toolbar for headings, text size, and inline images. Images upload to Supabase storage.</p>
               </div>
               <div class="form-field">
@@ -109,8 +111,27 @@
                 </select>
               </div>
               <div class="form-field" id="schedule-field" hidden>
-                <label for="scheduled_at">Publish at</label>
-                <input id="scheduled_at" name="scheduled_at" type="datetime-local">
+                <span>Publish at</span>
+                <div class="schedule-when">
+                  <select id="schedule-month" aria-label="Month">
+                    <option value="">Month</option>
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                  </select>
+                  <input id="schedule-day" inputmode="numeric" maxlength="2" placeholder="Day" aria-label="Day">
+                  <input id="schedule-year" inputmode="numeric" maxlength="4" placeholder="Year" aria-label="Year">
+                  <input id="schedule-time" type="time" lang="en-US" aria-label="Time">
+                </div>
                 <p class="muted" style="font-size:13px;margin:8px 0 0">The post stays off the blog until this time, then appears on its own.</p>
               </div>
               <div class="admin-actions">
