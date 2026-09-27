@@ -1,6 +1,7 @@
 const { listPublishedPosts } = require("../_lib/supabase");
 const { escapeHtml } = require("../_lib/markdown");
 const { formatDate, renderPage } = require("../_lib/layout");
+const { BLOG_CATEGORIES, categoryLabel, isBlogCategory } = require("../_lib/categories");
 
 function renderPostCards(posts) {
   if (!posts.length) {
@@ -14,6 +15,8 @@ function renderPostCards(posts) {
       .map((post) => {
         const date = formatDate(post.published_at || post.created_at);
         const excerpt = escapeHtml(post.excerpt || "");
+        const label = categoryLabel(post.category);
+        const meta = [label, date].filter(Boolean).map((part) => escapeHtml(part)).join(" · ");
         const cover = post.cover_image_url
           ? `<img class="blog-card-image" src="${escapeHtml(post.cover_image_url)}" alt="" loading="lazy" width="640" height="360">`
           : "";
@@ -21,7 +24,7 @@ function renderPostCards(posts) {
           <a class="blog-card-link" href="/blog/${escapeHtml(post.slug)}">
             ${cover}
             <div class="blog-card-body">
-              ${date ? `<div class="blog-meta">${escapeHtml(date)}</div>` : ""}
+              ${meta ? `<div class="blog-meta">${meta}</div>` : ""}
               <h2>${escapeHtml(post.title)}</h2>
               ${excerpt ? `<p>${excerpt}</p>` : ""}
               <span class="blog-read">Read article &rarr;</span>
@@ -33,6 +36,21 @@ function renderPostCards(posts) {
   </div>`;
 }
 
+function requestedCategory(req) {
+  const url = new URL(req.url || "/", "http://localhost");
+  const category = url.searchParams.get("category") || "";
+  return isBlogCategory(category) ? category : "";
+}
+
+function renderFilters(active) {
+  const all = `<a href="/blog"${active ? "" : ' class="is-active"'}>All</a>`;
+  const links = BLOG_CATEGORIES.map((item) => {
+    const current = item.slug === active ? ' class="is-active"' : "";
+    return `<a href="/blog?category=${escapeHtml(item.slug)}"${current}>${escapeHtml(item.label)}</a>`;
+  }).join("");
+  return `<nav class="blog-filters" aria-label="Blog categories">${all}${links}</nav>`;
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.status(405).setHeader("Allow", "GET, HEAD").end("Method not allowed");
@@ -40,25 +58,28 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const posts = await listPublishedPosts({ limit: 100 });
+    const category = requestedCategory(req);
+    const posts = await listPublishedPosts({ limit: 100, category });
+    const categoryName = categoryLabel(category);
     const bodyHtml = `<section class="page-hero">
   <div class="wrap">
     <div class="eyebrow">Blog</div>
-    <h1>Auction listing insights</h1>
+    <h1>${categoryName ? escapeHtml(categoryName) : "Auction listing insights"}</h1>
     <p class="lead">Practical guides for resellers, auction houses, and liquidation teams using AI to list inventory faster.</p>
   </div>
 </section>
 <section class="section" style="padding-top:0">
   <div class="wrap">
+    ${renderFilters(category)}
     ${renderPostCards(Array.isArray(posts) ? posts : [])}
   </div>
 </section>`;
 
     const html = renderPage({
-      title: "Blog | bigbid AI",
+      title: categoryName ? `${categoryName} | bigbid AI Blog` : "Blog | bigbid AI",
       description:
         "Guides and updates from bigbid AI on auction listing automation, HiBid workflows, MSRP research, and high-volume inventory.",
-      canonicalPath: "/blog",
+      canonicalPath: category ? `/blog?category=${category}` : "/blog",
       activeNav: "blog",
       bodyHtml,
       jsonLd: {

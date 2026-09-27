@@ -1,6 +1,7 @@
 const { getPublishedPostBySlug } = require("../_lib/supabase");
 const { escapeHtml, contentToHtml } = require("../_lib/markdown");
 const { formatDate, renderPage, SITE_URL } = require("../_lib/layout");
+const { categoryLabel } = require("../_lib/categories");
 
 function getSlug(req) {
   if (req.query && req.query.slug) return String(req.query.slug);
@@ -45,6 +46,7 @@ module.exports = async function handler(req, res) {
 
     const date = formatDate(post.published_at || post.created_at);
     const description = post.excerpt || post.title;
+    const label = categoryLabel(post.category);
     const contentHtml = contentToHtml(post.content);
     const cover = post.cover_image_url
       ? `<img class="blog-cover" src="${escapeHtml(post.cover_image_url)}" alt="" width="1200" height="630">`
@@ -54,6 +56,7 @@ module.exports = async function handler(req, res) {
   <section class="page-hero">
     <div class="wrap blog-article-head">
       <div class="eyebrow">Blog</div>
+      ${label ? `<a class="blog-category" href="/blog?category=${escapeHtml(post.category)}">${escapeHtml(label)}</a>` : ""}
       ${date ? `<div class="blog-meta">${escapeHtml(date)}</div>` : ""}
       <h1>${escapeHtml(post.title)}</h1>
       ${post.excerpt ? `<p class="lead">${escapeHtml(post.excerpt)}</p>` : ""}
@@ -85,6 +88,7 @@ module.exports = async function handler(req, res) {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
         headline: post.title,
+        articleSection: label || undefined,
         description,
         datePublished: post.published_at || post.created_at,
         dateModified: post.updated_at || post.published_at || post.created_at,

@@ -208,6 +208,14 @@ function formatWhen(iso) {
   });
 }
 
+const CATEGORY_LABELS = {
+  "auction-tips": "Auction Tips",
+  "product-research": "Product Research",
+  "hibid-guides": "HiBid Guides",
+  liquidation: "Liquidation",
+  "automation-ai": "Automation & AI",
+};
+
 function isLivePost(post) {
   if (!post) return false;
   if (post.status === "published") return true;
@@ -240,6 +248,9 @@ function fillForm(post) {
   document.getElementById("excerpt").value = post.excerpt || "";
   document.getElementById("cover_image_url").value = post.cover_image_url || "";
   setEditorHtml(post.content || "");
+  document.getElementById("category").value = CATEGORY_LABELS[post.category]
+    ? post.category
+    : "auction-tips";
   document.getElementById("status").value = post.status || "draft";
   fillScheduleFields(post.status === "scheduled" ? post.published_at : "");
   syncScheduleField();
@@ -278,7 +289,7 @@ async function requireAdmin(user) {
 async function loadPosts() {
   const { data, error } = await supabase
     .from("blog_posts")
-    .select("id,slug,title,status,published_at,updated_at,created_at")
+    .select("id,slug,title,category,status,published_at,updated_at,created_at")
     .order("updated_at", { ascending: false });
 
   if (error) throw error;
@@ -296,9 +307,8 @@ async function loadPosts() {
     const when = post.status === "scheduled" && post.published_at ? formatWhen(post.published_at) : "";
     const live = post.status === "scheduled" && isLivePost(post) ? " (live)" : "";
     const statusLabel = when ? `scheduled${live} · ${when}` : post.status;
-    button.innerHTML = `<strong>${escapeHtml(post.title)}</strong><span>${escapeHtml(statusLabel)} · ${escapeHtml(
-      post.slug
-    )}</span>`;
+    const categoryLabel = CATEGORY_LABELS[post.category] || post.category || "";
+    button.innerHTML = `<strong>${escapeHtml(post.title)}</strong><span>${escapeHtml(categoryLabel)} · ${escapeHtml(statusLabel)}</span>`;
     button.addEventListener("click", () => openPost(post.id));
     postsList.appendChild(button);
   }
@@ -395,6 +405,7 @@ postForm.addEventListener("submit", async (event) => {
     excerpt: document.getElementById("excerpt").value.trim(),
     cover_image_url: document.getElementById("cover_image_url").value.trim() || null,
     content,
+    category: document.getElementById("category").value || "auction-tips",
     status,
     author_id: currentUser.id,
     published_at:

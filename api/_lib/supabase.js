@@ -73,18 +73,19 @@ function livePostFilter() {
   return `or=(status.eq.published,and(status.eq.scheduled,published_at.lte."${now}"))`;
 }
 
-async function listPublishedPosts({ limit = 50 } = {}) {
+async function listPublishedPosts({ limit = 50, category } = {}) {
   const params = new URLSearchParams({
-    select: "id,slug,title,excerpt,cover_image_url,published_at,updated_at,created_at",
+    select: "id,slug,title,excerpt,cover_image_url,category,published_at,updated_at,created_at",
     order: "published_at.desc.nullslast",
     limit: String(limit),
   });
+  if (category) params.set("category", `eq.${category}`);
   return supabaseFetch(`blog_posts?${params.toString()}&${livePostFilter()}`);
 }
 
 async function getPublishedPostBySlug(slug) {
   const params = new URLSearchParams({
-    select: "id,slug,title,excerpt,content,cover_image_url,published_at,updated_at,created_at",
+    select: "id,slug,title,excerpt,content,cover_image_url,category,published_at,updated_at,created_at",
     slug: `eq.${slug}`,
     limit: "1",
   });
